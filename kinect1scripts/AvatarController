@@ -1,0 +1,13 @@
+using ...
+
+//需要有Animator组件
+[RequireComponent(typeof(Animator))]
+
+//进入主要部分：AvatarController类的定义
+
+public class AvatarController : MonoBehaviour
+{
+  一些public 变量
+  ...
+
+}
