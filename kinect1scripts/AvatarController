@@ -43,7 +43,7 @@ public class AvatarController : MonoBehaviour
   {
     //设置人物手臂为T形
     SetModelArmsInTpose();
-    //初始化bone
+    //初始化bone,bone将与模型各关节对应
     bones = new Transform[31];
     //初始化bone的角度和方向
     initialRotations = new Quaternion[bones.Length];
@@ -55,8 +55,8 @@ public class AvatarController : MonoBehaviour
   
   函数 UpdateAvatar(Int64 UserID)
   {
-    //将模型移动到kinect位置
-    MoveAvatar(UserID);
+    //将模型移动到kinect位置(externalRootMotion:Avatar是否被其他脚本应用)
+    if(!externalRootMotion){MoveAvatar(UserID);}
     
     //通过遍历将boneIndex2JointMap[boneIndex]->joint,再TransformBone(...)
     //某些骨骼通过specIndex2JointMap[boneIndex]->alJoints,再TransformSpecialBone(...)
@@ -64,6 +64,35 @@ public class AvatarController : MonoBehaviour
     {...}
   }
   
+  函数 ResetToInitialPosition()
+  {
   
+  }
 
+  函数 SuccessfulCalibration(Int64 userId)
+  {
+  
+  }
+  
+  函数 TransformBone(Int64 userId, KinectInterop.JointType joint, int boneIndex, bool flip)
+  {
+    //根据boneIndex 获取人物模型对应关节
+    Transform boneTransform = bones[boneIndex];
+    //得到joint对应的真人关节方位
+    Quaternion jointRotation = kinectManager.GetJointOrientation(userId, iJoint, flip);
+    //计算人物模型关节新的方位
+    Quaternion newRotation = Kinect2AvatarRot(jointRotation, boneIndex);
+    //转化关节角度
+    boneTransform.rotation = newRotation; //平滑方式：Quaternion.Slerp(boneTransform.rotation, newRotation, smoothFactor * Time.deltaTime);
+  }
+  
+   函数 MoveAvatar(Int64 UserID)
+   {
+     //得到UserID对应的脊柱位置
+     Vector3 trans = kinectManager.GetUserPosition(UserID);
+     //不懂待完善
+     ...
+   }
+   
+  
 }
