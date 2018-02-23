@@ -1,3 +1,4 @@
+##放在受控制游戏角色上##
 using ...
 
 //需要有Animator组件
@@ -7,7 +8,62 @@ using ...
 
 public class AvatarController : MonoBehaviour
 {
+  [Tooltip("")] //变量提示
   一些public 变量
-  ...
+  [NonSerialized] //不在面板显示
+  一些public 变量
+  
+  一些protected 变量
+  
+  一些private 变量
+  
+  函数 GetBoneTransformCount()
+  {
+    返回bone数组的长度（bone.Length）
+  }
+  
+  函数 GetBoneTransform(int index)
+  {
+    返回指定的bone（bones[index]）
+  }
+  
+  函数 GetBoneIndexByJoint(KinectInterop.JointType joint, bool bMirrored)
+  {
+    根据joint返回对应的bone的索引（boneIndex = jointMap2boneIndex[joint]）
+    //bMirrored 决定是否镜像
+  }
+  
+  函数 GetSpecIndexByJoint(KinectInterop.JointType joint1, KinectInterop.JointType joint2, bool bMirrored)
+  {
+    //作用未知
+    //根据特定的joint1和joint2组合返回boneIndex
+  }
+  
+  主要函数 Awake()
+  {
+    //设置人物手臂为T形
+    SetModelArmsInTpose();
+    //初始化bone
+    bones = new Transform[31];
+    //初始化bone的角度和方向
+    initialRotations = new Quaternion[bones.Length];
+    //将bone与kinect捕捉到的point映射
+    MapBones();
+    //
+    isRigidBody = gameObject.GetComponent<Rigidbody>();
+  }
+  
+  函数 UpdateAvatar(Int64 UserID)
+  {
+    //将模型移动到kinect位置
+    MoveAvatar(UserID);
+    
+    //通过遍历将boneIndex2JointMap[boneIndex]->joint,再TransformBone(...)
+    //某些骨骼通过specIndex2JointMap[boneIndex]->alJoints,再TransformSpecialBone(...)
+    for (boneIndex = 0; boneIndex < bones.Length; boneIndex++)
+    {...}
+  }
+  
+  
 
 }
