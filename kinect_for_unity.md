@@ -49,3 +49,7 @@ LeanRight 与上面相反
 KickLeft 向前踢左脚
 
 KickRight 向前踢右脚
+
+#-*-kinect识别关节对照图-*-\
+参考网址：http://www.bubuko.com/infodetail-2104441.html
+![jointMap](https://github.com/Freecss123456/unity3D/blob/master/image/kinect_Joints.png)
