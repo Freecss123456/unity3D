@@ -1,2 +1,20 @@
 ##放在KinectController物体上##
 
+using...
+
+public class SimpleGestureListener : MonoBehaviour, KinectGestures.GestureListenerInterface
+{
+  //将待控制的带GUIText的物体拖入
+  public GUIText gestureInfo;
+  
+  函数 UserDetected(long userId, int userIndex)
+  {
+  
+  }
+  
+  主要函数 Update()
+  {
+  
+  }
+  
+}
