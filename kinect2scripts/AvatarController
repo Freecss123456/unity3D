@@ -1,5 +1,23 @@
 ...
-函数 Awake()
-{
 
+ /*****************************************************************************/
+  主要函数 Awake()
+  {
+    //初始化bone,bone将与模型各关节对应
+    bones = new Transform[31];
+    //获得人物模型组件
+    animatorComponent = GetComponent<Animator>();
+    //将bone与kinect捕捉到的point映射
+    MapBones();
+    //设置人物手臂为T形
+    SetModelArmsInTpose();
+    //初始化bone的角度和方向
+    initialRotations = new Quaternion[bones.Length];
+    localRotations = new Quaternion[bones.Length];
+    //将人物模型每块骨干使能
+    isBoneDisabled = new bool[bones.Length];
+    for(...)
+    {
+      isBoneDisabled[i] = false;
+    }
 }
