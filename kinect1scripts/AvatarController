@@ -38,7 +38,8 @@ public class AvatarController : MonoBehaviour
     //作用未知
     //根据特定的joint1和joint2组合返回boneIndex
   }
-  
+
+ /*****************************************************************************/
   主要函数 Awake()
   {
     //设置人物手臂为T形
@@ -52,7 +53,8 @@ public class AvatarController : MonoBehaviour
     //
     isRigidBody = gameObject.GetComponent<Rigidbody>();
   }
-  
+ 
+/*****************************************************************************/
   函数 UpdateAvatar(Int64 UserID)
   {
     //将模型移动到kinect位置(externalRootMotion:Avatar是否被其他脚本应用)
@@ -74,6 +76,7 @@ public class AvatarController : MonoBehaviour
   
   }
   
+ /*****************************************************************************/
   函数 TransformBone(Int64 userId, KinectInterop.JointType joint, int boneIndex, bool flip)
   {
     //根据boneIndex 获取人物模型对应关节
@@ -85,7 +88,8 @@ public class AvatarController : MonoBehaviour
     //转化关节角度
     boneTransform.rotation = newRotation; //平滑方式：Quaternion.Slerp(boneTransform.rotation, newRotation, smoothFactor * Time.deltaTime);
   }
-  
+
+ /*****************************************************************************/
    函数 MoveAvatar(Int64 UserID)
    {
      //得到UserID对应的脊柱位置
@@ -94,5 +98,44 @@ public class AvatarController : MonoBehaviour
      ...
    }
    
+ /*****************************************************************************/
+   函数 SetModelArmsInTpose() //将人物模型初始化为T形
+   {
+    //得到人物模型组件animator
+    Animator animator = GetComponent<Animator>();
+    //得到人物模型的 标准左方向 向量vTposeLeftDir
+    Vector3 vTposeLeftDir = transform.TransformDirection(Vector3.left);
+		
+    //得到人物模型左臂的三个关节
+		Transform transLeftUarm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+		Transform transLeftLarm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
+		Transform transLeftHand = animator.GetBoneTransform(HumanBodyBones.LeftHand);
+		
+    //如果关节不为空
+		if(transLeftUarm != null && transLeftLarm != null)
+		{
+      //计算上臂的方向vUarmLeftDir
+      Vector3 vUarmLeftDir = transLeftLarm.position - transLeftUarm.position;
+      //计算 上臂方向 与 标准左方向 的夹角fUarmLeftAngle
+			float fUarmLeftAngle = Vector3.Angle(vUarmLeftDir, vTposeLeftDir);
+			//如果夹角大于5°
+			if(Mathf.Abs(fUarmLeftAngle) >= 5f)
+			{
+        //旋转上臂至 标准左方向
+				Quaternion vFixRotation = Quaternion.FromToRotation(vUarmLeftDir, vTposeLeftDir);
+				transLeftUarm.rotation = vFixRotation * transLeftUarm.rotation;
+			}
+      //前臂的处理同上
+      if(transLeftHand != null)
+      {
+        ...
+      }
+    }
+            
+    //右臂的处理同上
+    /*...*/
+   }
+   
+  /*****************************************************************************/
   
 }
