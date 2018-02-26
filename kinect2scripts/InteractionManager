@@ -9,3 +9,23 @@ public interface InteractionListenerInterface
 	void HandReleaseDetected(long userId, int userIndex, bool isRightHand, bool isHandInteracting, Vector3 handScreenPos);
   bool HandClickDetected(long userId, int userIndex, bool isRightHand, Vector3 handScreenPos);
 }
+//InteractionManager类的定义
+public class InteractionManager : MonoBehaviour 
+{
+ 	//一些public变量
+	public int playerIndex = 0;
+	...
+	public GUIText debugText;
+	//一些private变量
+	private long playerUserID = 0;
+	...
+	//在类中实例化自身
+	private static InteractionManager instance;
+	//一些public函数，均是获取上述的private变量值
+	public static InteractionManager Instance
+	...
+	public float GetCursorClickProgress()
+	
+	
+	
+}
