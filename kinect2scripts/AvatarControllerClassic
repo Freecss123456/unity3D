@@ -1,0 +1,17 @@
+//AvatarControllerClassic继承自AvatarController
+public class AvatarControllerClassic : AvatarController
+{
+  //手动指定个骨骼
+  public Transform HipCenter;
+  ...
+  public Transform FootRight;
+  
+  //重写AvatarController类中的MapBones()函数
+  protected override void MapBones()
+  {
+    bones[0] = HipCenter;
+    ...
+    bones[30] = ThumbRight;
+  }
+  
+}
