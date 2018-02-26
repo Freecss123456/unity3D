@@ -5,78 +5,100 @@ using ...
 //声明一个接口
 public interface InteractionListenerInterface
 {
-	void HandGripDetected(long userId, int userIndex, bool isRightHand, bool isHandInteracting, Vector3 handScreenPos);
-	void HandReleaseDetected(long userId, int userIndex, bool isRightHand, bool isHandInteracting, Vector3 handScreenPos);
+  void HandGripDetected(long userId, int userIndex, bool isRightHand, bool isHandInteracting, Vector3 handScreenPos);
+  void HandReleaseDetected(long userId, int userIndex, bool isRightHand, bool isHandInteracting, Vector3 handScreenPos);
   bool HandClickDetected(long userId, int userIndex, bool isRightHand, Vector3 handScreenPos);
 }
 //InteractionManager类的定义
 public class InteractionManager : MonoBehaviour 
 {
- 	//一些public变量
-	public int playerIndex = 0;
-	...
-	public GUIText debugText;
-	//一些private变量
-	private long playerUserID = 0;
-	...
-	//在类中实例化自身
-	private static InteractionManager instance;
-	//一些public函数，均是获取上述的private变量值
-	public static InteractionManager Instance
-	...
-	public float GetCursorClickProgress()
+   //一些public变量
+  public int playerIndex = 0;
+  ...
+  public GUIText debugText;
+  //一些private变量
+  private long playerUserID = 0;
+  ...
+  //在类中实例化自身
+  private static InteractionManager instance;
+  //一些public函数，均是获取上述的private变量值
+  public static InteractionManager Instance
+  ...
+  public float GetCursorClickProgress()
 	
-	主要函数 Awake()
+  主要函数 Awake()
  {
- 	instance = this;
+   instance = this;
  }
  
- 	主要函数 Start()
-	{
-		//获得场景中的UIProgressBar(环形进度条，是guiHandCursor的子物体)
-		GameObject objProgressBar = guiHandCursor.transform.GetChild(0).gameObject
-		//获得objProgressBar的Image组件
-		cursorProgressBar = objProgressBar.GetComponent<Image>()
-		
-		//如果没有interactionListeners，将会在场景中搜索并添加到interactionListeners列表
-		if(interactionListeners.Count == 0)
-		{
-		}
-		
-	}
+   主要函数 Start()
+  {
+    //获得场景中的UIProgressBar(环形进度条，是guiHandCursor的子物体)
+    GameObject objProgressBar = guiHandCursor.transform.GetChild(0).gameObject
+    //获得objProgressBar的Image组件
+    cursorProgressBar = objProgressBar.GetComponent<Image>()
+    
+    //如果没有interactionListeners，将会在场景中搜索并添加到interactionListeners列表
+    if(interactionListeners.Count == 0)
+    {
+    } 
+  }
 	
-	 主要函数 OnDestroy()
-	 {
-	 	interactionInited = false;
-		instance = null;
-	 }
-	 
-	 主要函数 Update ()
-	 {
-	 	KinectManager kinectManager = KinectManager.Instance;
-		//如果检测到用户
-		if(playerUserID != 0)
+    主要函数 OnDestroy()
+  {
+     interactionInited = false;
+     instance = null;
+  }
+  
+    主要函数 OnDestroy()
+  {
+      interactionInited = false;
+      instance = null; 
+  }
+  
+    主要函数 Update ()
+   {
+      KinectManager kinectManager = KinectManager.Instance;
+      //如果检测到用户
+      if(playerUserID != 0)
+      {
+	//获得左手状态
+	leftHandState = kinectManager.GetLeftHandState(playerUserID);
+	//检查左手是否有效，并获得交互框（leftIboxLeftBotBack，leftIboxRightTopFront）
+	isleftIboxValid = kinectManager.GetLeftHandInteractionBox
+		(playerUserID, ref leftIboxLeftBotBack, ref leftIboxRightTopFront, isleftIboxValid);
+	//保存上一次的isLeftHandInteracting
+	bool wasLeftHandInteracting = isLeftHandInteracting;
+	
+	//如果左手有效且左手关节被检测到
+	if(isleftIboxValid && kinectManager.GetJointTrackingState(playerUserID, (int)KinectInterop.JointType.HandLeft) != KinectInterop.TrackingState.NotTracked)
+	{
+	  //获得左手位置
+	  leftHandPos = kinectManager.GetJointPosition(playerUserID, (int)KinectInterop.JointType.HandLeft);
+	  //计算 左手z坐标 与 交互框 的比值
+	  leftHandScreenPos.z = Mathf.Clamp01((leftIboxLeftBotBack.z - leftHandPos.z) / (leftIboxLeftBotBack.z - leftIboxRightTopFront.z));
+	  //如果handOverlayCursor==false
+	  if (!handOverlayCursor)
 	  {
-			//获得左手状态
-			leftHandState = kinectManager.GetLeftHandState(playerUserID);
-			//检查左手是否有效，并获得交互框（leftIboxLeftBotBack，leftIboxRightTopFront）
-			isleftIboxValid = kinectManager.GetLeftHandInteractionBox
-				(playerUserID, ref leftIboxLeftBotBack, ref leftIboxRightTopFront, isleftIboxValid);
-			//保存上一次的isLeftHandInteracting
-			bool wasLeftHandInteracting = isLeftHandInteracting;
-			
-			//如果左手有效且左手关节被检测到
-			if(isleftIboxValid && kinectManager.GetJointTrackingState(playerUserID, (int)KinectInterop.JointType.HandLeft) != KinectInterop.TrackingState.NotTracked)
-		  {
-				//获得左手位置
-				leftHandPos = kinectManager.GetJointPosition(playerUserID, (int)KinectInterop.JointType.HandLeft);
-				//计算 左手z坐标 与 交互框 的比值
-				leftHandScreenPos.z = Mathf.Clamp01((leftIboxLeftBotBack.z - leftHandPos.z) / (leftIboxLeftBotBack.z - leftIboxRightTopFront.z));
-				//
-				if (!handOverlayCursor)
-			} 		
-		} 		
-	 }
+	    //计算计算 左手x、y坐标 与 交互框 的比值
+	    leftHandScreenPos.x = ...
+	    leftHandScreenPos.y = ...
+	    //判断左手是否在交互框内
+	    isLeftHandInteracting = ...	
+	  }
+	  else
+	  {
+	    //直接判断左手是否在交互框内,并计算leftHandScreenPos的x、y坐标
+	    isLeftHandInteracting = GetHandOverlayScreenPos (kinectManager, (int)KinectInterop.JointType.HandLeft, ref leftHandScreenPos)&&...
+	  }
+	  //如果左手前一次没在交互框，这一次在交互框，更新leftHandInteractingSince时间
+	  if(!wasLeftHandInteracting && isLeftHandInteracting)
+	  {
+	    leftHandInteractingSince = Time.realtimeSinceStartup;
+	  }
+	} 		
+       } 		
+   }
 	 
  
 }
