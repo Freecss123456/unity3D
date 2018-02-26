@@ -1,0 +1,11 @@
+##与KinectManager脚本同放在摄像机或KinectController物体上##
+
+using ...
+
+//声明一个接口
+public interface InteractionListenerInterface
+{
+	void HandGripDetected(long userId, int userIndex, bool isRightHand, bool isHandInteracting, Vector3 handScreenPos);
+	void HandReleaseDetected(long userId, int userIndex, bool isRightHand, bool isHandInteracting, Vector3 handScreenPos);
+  bool HandClickDetected(long userId, int userIndex, bool isRightHand, Vector3 handScreenPos);
+}
