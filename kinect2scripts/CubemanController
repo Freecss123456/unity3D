@@ -1,0 +1,59 @@
+##放在Cubeman物体上##
+
+using...
+
+public class CubemanController : MonoBehaviour
+{  
+  public 一些参数设置;
+  //
+  public GameObject Hip_Center;
+  public GameObject Spine;
+  ...
+  public GameObject Thumb_Right;
+  //
+  public LineRenderer skeletonLine;
+  public LineRenderer debugLine;
+  //
+  private ...
+  
+  
+  主要函数 Start () 
+  {
+    //将上面的各骨骼存入bones数组
+    bones = new GameObject[] {
+			Hip_Center,
+      ...
+      Thumb_Right
+      };
+    initialPosition = transform.position;
+		initialRotation = transform.rotation;    
+  }
+  
+  
+  
+  主要函数 Update()
+  {
+    //获得类对象
+    KinectManager manager = KinectManager.Instance;
+    //获得第一个用户ID
+    Int64 userID = manager ? manager.GetUserIdByIndex(playerIndex) : 0;
+    //如果没有检测到用户
+    if(userID <= 0)
+    {
+      将Cubeman的position和rotation全部归零，并将bone数组和lines数组SetActive(true)
+      return;
+    }
+    //检测到用户
+    //获得用户位置posPointMan
+    Vector3 posPointMan = manager.GetUserPosition(userID);
+    //计算当前用户位置与初始位置的偏差relPosUser
+    Vector3 relPosUser = (posPointMan - initialPosOffset);
+    //将Cubeman物体移动到kinect捕捉的实际位置，verticalMovement决定物体是否要在y轴上移动
+    transform.position = initialPosOffset + 
+		(verticalMovement ? relPosUser * moveRate : new Vector3(relPosUser.x, 0, relPosUser.z) * moveRate);
+    //更新骨骼的位置和角度，以及lines数组的位置
+    for(int i = 0; i < bones.Length; i++)
+    {...}   
+  }
+  
+}
