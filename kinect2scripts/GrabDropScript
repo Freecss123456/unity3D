@@ -1,0 +1,111 @@
+using ...
+
+public class GrabDropScript : MonoBehaviour, InteractionListenerInterface
+{
+  
+  函数 SetUseGravity(bool bUseGravity)
+  {
+    //将该类的public变量useGravity设置为 bUseGravity的值
+    this.useGravity = bUseGravity;
+  }
+  
+  函数 RequestObjectReset()
+	{
+    //将该类的public变量resetObjects设置为真(需要重置可拖动对象)
+		resetObjects = true;
+	}
+  
+  主要函数 Start()
+  {
+    //将 screenCamera变量 指定为 Camera.main
+    if (screenCamera == null) 
+		{
+			screenCamera = Camera.main;
+		}
+    
+    //将场景中可拖动物体的位置和角度转换为相对screenCamera的位置和角度，并存入initialObjPos和initialObjRot数组
+    for(;i < draggableObjects.Length;){}
+    
+    //获得InteractionManager类对象
+    if(interactionManager == null)
+		{
+			interactionManager = InteractionManager.Instance;
+		}
+  }
+  
+  主要函数 Update()
+  {
+    //如果draggedObject还未赋值
+    if(draggedObject == null)
+    {
+      //如果手部动作是抓紧 且 手的坐标不为零
+      if(lastHandEvent == InteractionManager.HandEventType.Grip && screenNormalPos != Vector3.zero)
+      {
+        //获得左手或右手的 像素坐标:screenPixelPos
+        screenNormalPos=interactionManager.GetLeftHandScreenPos() 或 interactionManager.GetRightHandScreenPos();
+        screenPixelPos.x = (int)(screenNormalPos.x * (screenCamera ? screenCamera.pixelWidth : Screen.width));
+				screenPixelPos.y = (int)(screenNormalPos.y * (screenCamera ? screenCamera.pixelHeight : Screen.height));
+        
+        //定义 以screenPixelPos为起点的射线ray
+        Ray ray = screenCamera ? screenCamera.ScreenPointToRay(screenPixelPos) : new Ray();
+        //如果射线碰到物体，判断是哪个物体并相应处理
+        if(Physics.Raycast(ray, out hit))
+					{
+						foreach(GameObject obj in draggableObjects)
+						{
+							if(hit.collider.gameObject == obj)
+							{
+                //draggedObject赋值为抓到的物体，并计算 手 与 物体中心的距离:draggedObjectOffset
+                draggedObject = obj;
+								draggedObjectOffset = hit.point - draggedObject.transform.position;
+								draggedObjectOffset.z = 0; // don't change z-pos
+                //
+                draggedNormalZ = (minZ + screenNormalPos.z * (maxZ - minZ)) - draggedObject.transform.position.z;
+                //更换draggedObject的材质，即让被抓住物体变色
+                draggedObjectMaterial = draggedObject.GetComponent<Renderer>().material;
+								draggedObject.GetComponent<Renderer>().material = selectedObjectMaterial;
+                //让被抓住物体重力效果 失能
+                draggedObject.GetComponent<Rigidbody>().useGravity = false;
+              }
+             }
+           }
+      }
+    }
+    else
+    {
+      //获得左手或右手的 像素坐标:screenPixelPos
+      screenNormalPos=interactionManager.GetLeftHandScreenPos() 或 interactionManager.GetRightHandScreenPos();
+      screenPixelPos.x = (int)(screenNormalPos.x * (screenCamera ? screenCamera.pixelWidth : Screen.width));
+		  screenPixelPos.y = (int)(screenNormalPos.y * (screenCamera ? screenCamera.pixelHeight : Screen.height));
+      screenPixelPos.z = (minZ + screenNormalPos.z * (maxZ - minZ)) - draggedNormalZ -
+					(screenCamera ? screenCamera.transform.position.z : 0f);
+          
+      //将物体平滑地移动到手的位置
+      newObjectPos = screenCamera.ScreenToWorldPoint(screenPixelPos) - draggedObjectOffset;
+			draggedObject.transform.position = Vector3.Lerp(draggedObject.transform.position, newObjectPos, dragSpeed * Time.deltaTime);
+      //检查手是否松开
+      bool isReleased = lastHandEvent == InteractionManager.HandEventType.Release;
+      //如果松开
+      if(isReleased)
+      {
+        恢复被抓物体的材质和重力效果
+        draggedObject = null;
+      }
+      
+    }
+  }
+  
+  主要函数 OnGUI()
+  {
+  
+  }
+  
+  函数 ResetObjects()
+  {
+    for(;i < draggableObjects.Length;)
+    {
+      //draggableObjects[i]的 useGravity=false; velocity=Vector3.zero; position=initialObjPos[i]; rotation=initialObjRot[i]
+    }
+  }
+  
+}
