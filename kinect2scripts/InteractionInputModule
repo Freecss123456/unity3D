@@ -1,0 +1,18 @@
+using ...
+
+public class InteractionInputModule : PointerInputModule, InteractionListenerInterface
+{
+  
+  函数 InteractionInputModule()
+  {
+    instance = this;
+  }
+  
+  函数 forceModuleActive()
+  {
+    //获取或设置m_ForceModuleActive的值
+    get { return m_ForceModuleActive; }
+    set { m_ForceModuleActive = value; }
+  }
+ 
+}
