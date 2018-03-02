@@ -22,6 +22,7 @@ public class InteractionManager : MonoBehaviour
   //在类中实例化自身
   private static InteractionManager instance;
   //一些public函数，均是获取上述的private变量值
+  //Instance:该类的自身实例化
   public static InteractionManager Instance
   ...
   public float GetCursorClickProgress()
@@ -100,5 +101,17 @@ public class InteractionManager : MonoBehaviour
        } 		
    }
 	 
+ 函数 HandStateToEvent(KinectInterop.HandState handState, HandEventType lastEventType)
+ {
+   //switch判断kinect获得的handState
+   switch(handState)
+   {
+     //如果是HandState.Open,则return Release
+     //如果是HandState.Closed或HandState.Lasso,则return Grip
+     //如果是HandState.Unknown,则return lastEventType(上一次的状态)
+   }
+   //如果都不是return None
+   return HandEventType.None;
+ }
  
 }
