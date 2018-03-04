@@ -182,6 +182,33 @@ public class InteractionManager : MonoBehaviour
    //右手同上
    //将kinect检测到的左手状态读出
    handEvent = HandStateToEvent(leftHandState, lastLeftHandEvent);
+   //上一次和此次左手交互情况不同，鼠标光标设置为Release，lastLeftHandEvent设置为Release ; 右手同左手
+   if ((isLeftHandInteracting != isLeftHandPrimary) || (isRightHandInteracting != isRightHandPrimary))
+   {
+    if (controlMouseCursor && dragInProgress)
+    {
+     MouseControl.MouseRelease();
+     dragInProgress = false;
+    }
+
+    lastLeftHandEvent = HandEventType.Release;
+    lastRightHandEvent = HandEventType.Release;
+   }
+   
+   //
+   if (controlMouseCursor && (handEvent != lastLeftHandEvent))
+   {
+    if (controlMouseDrag && !dragInProgress && (handEvent == HandEventType.Grip))
+    {
+     dragInProgress = true;
+     MouseControl.MouseDrag();
+    }
+    else if (dragInProgress && (handEvent == HandEventType.Release))
+    {
+     MouseControl.MouseRelease();
+     dragInProgress = false;
+    }
+   }
    
  }
 	 
