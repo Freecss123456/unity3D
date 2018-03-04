@@ -1,0 +1,24 @@
+    private Button button;
+    private ColorBlock cb = new ColorBlock();
+
+//--------------------按钮切换颜色与文本--------------------
+    void Awake()
+    {
+        button = gameObject.GetComponent<Button>() as Button;//获取Button组件
+        //定义按钮颜色
+        cb.normalColor = Color.green;
+        cb.highlightedColor = Color.white;
+        cb.pressedColor = Color.white;
+        cb.disabledColor = Color.white;
+        cb.colorMultiplier = 1;
+    }
+    
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            //button.onClick.AddListener(delegate (){this.OnClick(gameObject);});
+            button.colors = cb;
+            button.GetComponentInChildren<Text>().text = "hello";
+        }
+    }
