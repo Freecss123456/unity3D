@@ -74,32 +74,116 @@ public class InteractionManager : MonoBehaviour
 	//如果左手有效且左手关节被检测到
 	if(isleftIboxValid && kinectManager.GetJointTrackingState(playerUserID, (int)KinectInterop.JointType.HandLeft) != KinectInterop.TrackingState.NotTracked)
 	{
+	  /****************************检测左手是否交互,并计算leftHandScreenPos******************************/
 	  //获得左手位置
 	  leftHandPos = kinectManager.GetJointPosition(playerUserID, (int)KinectInterop.JointType.HandLeft);
-	  //计算 左手z坐标 与 交互框 的比值
+	  //计算 左手z坐标 与 交互框 的比值:(0,1)
 	  leftHandScreenPos.z = Mathf.Clamp01((leftIboxLeftBotBack.z - leftHandPos.z) / (leftIboxLeftBotBack.z - leftIboxRightTopFront.z));
 	  //如果handOverlayCursor==false
 	  if (!handOverlayCursor)
 	  {
-	    //计算计算 左手x、y坐标 与 交互框 的比值
+	    //计算计算 左手x、y坐标 与 交互框 的比值:(0,1)
 	    leftHandScreenPos.x = ...
 	    leftHandScreenPos.y = ...
-	    //判断左手是否在交互框内
+	    //通过左手的x,y,z坐标是否在交互框内 判断左手是否在交互
 	    isLeftHandInteracting = ...	
 	  }
 	  else
 	  {
-	    //直接判断左手是否在交互框内,并计算leftHandScreenPos的x、y坐标
+	    //通过左手的x,y坐标判断左手是否在交互,并计算leftHandScreenPos的x、y坐标
 	    isLeftHandInteracting = GetHandOverlayScreenPos (kinectManager, (int)KinectInterop.JointType.HandLeft, ref leftHandScreenPos)&&...
 	  }
-	  //如果左手前一次没在交互框，这一次在交互框，更新leftHandInteractingSince时间
+	  //如果左手前一次没在交互，这一次在交互，更新leftHandInteractingSince时间
 	  if(!wasLeftHandInteracting && isLeftHandInteracting)
 	  {
 	    leftHandInteractingSince = Time.realtimeSinceStartup;
 	  }
-	} 		
-       } 		
+	  /****************************检测左手是否交互,并计算leftHandScreenPos******************************/
+	  
+	  /****************************检测左手按压，在该例程中将按压当做点击******************************/
+	  //当左手z坐标与交互框比值大于0.99(左手离开交互框)，判断左手按压
+	  isLeftHandPress = leftHandScreenPos.z > 0.99f;
+	  //leftHandPressProgress = {[(当前时刻-上一次左手按压时刻) >= KinectClick周期] 且 (左手与交互框比值>=0.7)}?(leftHandScreenPos.z - 0.7f) / 0.3f : 0f
+	  leftHandPressProgress = (Time.realtimeSinceStartup - lastLeftHandPressTime) >= KinectInterop.Constants.ClickStayDuration &&
+                                                    leftHandScreenPos.z >= 0.7f ? (leftHandScreenPos.z - 0.7f) / 0.3f : 0f;
+	  /****************************检测左手按压******************************/	
+	  
+	  /****************************检测左手点击******************************/
+    //如果!dragInProgress 且 左手交互 且 (允许手点击&&此次与上次左手坐标差<Kinect.ClickMaxDistance) 或 (允许将手按压识别为点击&& leftHandPressProgress>0)
+	  if (!dragInProgress && isLeftHandInteracting &&((allowHandClicks && ((leftHandPos - lastLeftHandPos).magnitude < KinectInterop.Constants.ClickMaxDistance)) ||(allowPushToClick && leftHandPressProgress > 0f)))
+      {
+      //如果 [允许手点击 && (当前时刻-上一次左手点击时刻) >= KinectClick周期] 或 [允许将手按压识别为点击 && leftHandPressProgress>0.99 && isLeftHandPress]
+       if ((allowHandClicks && (Time.realtimeSinceStartup - lastLeftHandClickTime) >= KinectInterop.Constants.ClickStayDuration) ||(allowPushToClick && leftHandPressProgress > 0.99f && isLeftHandPress))
+       {
+         isLeftHandClick = true;
+         cursorClickProgress = leftHandClickProgress = 1f;
+         
+         //向每一个interactionListener发送HandClickDetected()，并将相应参数重置
+         foreach (InteractionListenerInterface listener in interactionListeners)
+         {
+           if (listener.HandClickDetected(playerUserID, playerIndex, false, leftHandScreenPos))
+           {
+               isLeftHandClick = false;
+               cursorClickProgress = leftHandClickProgress = 0f;
+               lastLeftHandPos = Vector3.zero;  
+               lastLeftHandClickTime = Time.realtimeSinceStartup;
+               lastLeftHandPressTime = Time.realtimeSinceStartup;
+           }
+         }
+         //如果 控制鼠标光标，执行MouseControl.MouseClick()，，并将相应参数重置
+         if (controlMouseCursor)
+         {
+           MouseControl.MouseClick();
+           isLeftHandClick = false;
+           cursorClickProgress = leftHandClickProgress = 0f;
+           lastLeftHandPos = Vector3.zero;
+           lastLeftHandClickTime = Time.realtimeSinceStartup;
+           lastLeftHandPressTime = Time.realtimeSinceStartup;
+         }
+       }
+       else
+       {
+         leftHandTimeProgress = 
+         cursorClickProgress = leftHandClickProgress =
+       }
+     else
+     { //左手点击=false ,上一次的左手 位置、时间= 当前位置、时间
+       isLeftHandClick = false;
+       leftHandClickProgress = 0f;
+       lastLeftHandPos = leftHandPos;
+       lastLeftHandClickTime = Time.realtimeSinceStartup;
+     }
+	  /****************************检测左手点击******************************/
+   
+   //右手同上
+   //如果左手和右手点击进程=0，停止光标点击进程
+   if (leftHandClickProgress == 0f && rightHandClickProgress == 0f && cursorClickProgress > 0f)
+   {
+    cursorClickProgress = 0f;
    }
+   //如果左手和右手都 交互，令交互时间长的那只手设为 交互，另一只false
+   if (isLeftHandInteracting && isRightHandInteracting)
+   {
+    if (rightHandInteractingSince <= leftHandInteractingSince)
+     isLeftHandInteracting = false;
+    else
+     isRightHandInteracting = false;
+   }
+   //如果左手上一次交互 这一次未交互,令左手状态为Release
+   if (wasLeftHandInteracting && !isLeftHandInteracting)
+   {
+    foreach (InteractionListenerInterface listener in interactionListeners)
+    {
+     if (lastLeftHandEvent == HandEventType.Grip)
+     listener.HandReleaseDetected(playerUserID, playerIndex, false, true, leftHandScreenPos);
+    }
+    lastLeftHandEvent = HandEventType.Release;
+   }
+   //右手同上
+   //将kinect检测到的左手状态读出
+   handEvent = HandStateToEvent(leftHandState, lastLeftHandEvent);
+   
+ }
 	 
  函数 HandStateToEvent(KinectInterop.HandState handState, HandEventType lastEventType)
  {
