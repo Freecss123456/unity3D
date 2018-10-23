@@ -1,4 +1,8 @@
 
+/***Camera组件->Culling Mask属性***/
+需要显示的Layer
+
+
 /***Camera组件->Projection属性:Orthographic***/
 Camera组件->size
 此时 摄像头采集高度=size*200， 摄像头采集宽度=摄像头采集高度*（屏幕宽/屏幕高），
