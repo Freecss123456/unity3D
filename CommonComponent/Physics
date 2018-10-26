@@ -1,0 +1,4 @@
+/***Physics.gravity***/
+例：
+（1）Physics.gravity = new Vector3(0, -2F, 0);
+（2）Edit->Project settings->Physics->Gravity
